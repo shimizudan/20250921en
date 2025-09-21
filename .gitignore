@@ -1,0 +1,32 @@
+# IDE and Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Claude Code files
+.claude/
+
+# Temporary files
+*.tmp
+*.temp
+index_new.html
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Julia files (keeping the main ones but excluding temp)
+*.jl.bak
+
+# Log files
+*.log

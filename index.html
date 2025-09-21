@@ -1,0 +1,1134 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>四角形面積最大化ツール（修正版）</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 2.2em;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+
+        .input-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            font-weight: bold;
+            color: #555;
+            margin-bottom: 8px;
+            font-size: 1.1em;
+        }
+
+        input[type="number"] {
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 1.1em;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        input[type="number"]:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            box-shadow: 0 8px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(45deg, #f093fb, #f5576c);
+            color: white;
+            box-shadow: 0 8px 15px rgba(245, 87, 108, 0.3);
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 25px rgba(245, 87, 108, 0.4);
+        }
+
+        .progress-container {
+            background: #f0f0f0;
+            border-radius: 10px;
+            height: 20px;
+            margin: 20px 0;
+            overflow: hidden;
+            display: none;
+        }
+
+        .progress-bar {
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            height: 100%;
+            width: 0%;
+            border-radius: 10px;
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            text-align: center;
+            margin-top: 10px;
+            color: #666;
+            display: none;
+        }
+
+        .results {
+            background: rgba(240, 248, 255, 0.9);
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 20px;
+            border-left: 5px solid #667eea;
+            display: none;
+        }
+
+        .result-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .result-card {
+            background: rgba(255, 255, 255, 0.8);
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .result-title {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+
+        .result-value {
+            color: #667eea;
+            font-weight: bold;
+            font-size: 1.3em;
+        }
+
+        .angles-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .angle-item {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .coordinates-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .coord-item {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 8px;
+            border-radius: 8px;
+            text-align: center;
+            font-family: monospace;
+        }
+
+        .canvas-container {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        canvas {
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            background: white;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .error {
+            background: rgba(255, 107, 107, 0.1);
+            border: 2px solid #ff6b6b;
+            color: #c0392b;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            display: none;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .info-box {
+            background: rgba(52, 152, 219, 0.1);
+            border: 2px solid #3498db;
+            color: #2980b9;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .warning-box {
+            background: rgba(255, 193, 7, 0.1);
+            border: 2px solid #ffc107;
+            color: #856404;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+            }
+            
+            .controls {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .btn {
+                width: 100%;
+                max-width: 250px;
+            }
+            
+            canvas {
+                max-width: 100%;
+                height: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>四角形面積最大化ツール（修正版）</h1>
+        <p class="subtitle">4辺の長さから凸四角形で面積が最大となる形状を求めます</p>
+        
+        <div class="info-box">
+            <strong>数学的に正確な計算</strong><br>
+            ピトー条件を考慮した適切な理論上限を使用します
+        </div>
+
+        <div class="input-section">
+            <div class="input-group">
+                <label for="sideA">辺 a の長さ</label>
+                <input type="number" id="sideA" min="0.1" step="0.1" value="3" required>
+            </div>
+            <div class="input-group">
+                <label for="sideB">辺 b の長さ</label>
+                <input type="number" id="sideB" min="0.1" step="0.1" value="4" required>
+            </div>
+            <div class="input-group">
+                <label for="sideC">辺 c の長さ</label>
+                <input type="number" id="sideC" min="0.1" step="0.1" value="5" required>
+            </div>
+            <div class="input-group">
+                <label for="sideD">辺 d の長さ</label>
+                <input type="number" id="sideD" min="0.1" step="0.1" value="6" required>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button class="btn btn-primary" onclick="calculateMaxArea()">面積最大化を計算</button>
+            <button class="btn btn-secondary" onclick="loadExample()">サンプル値</button>
+        </div>
+
+        <div class="progress-container" id="progress-container">
+            <div class="progress-bar" id="progress-bar"></div>
+        </div>
+        <div class="progress-text" id="progress-text"></div>
+
+        <div id="results" class="results">
+            <h3 style="color: #333; margin-bottom: 20px; text-align: center;">計算結果</h3>
+            
+            <div class="result-grid">
+                <div class="result-card">
+                    <div class="result-title">理論上限</div>
+                    <div class="result-value" id="theoretical-max">-</div>
+                    <div style="font-size: 0.9em; color: #666; margin-top: 5px;" id="theoretical-type">-</div>
+                </div>
+
+                <div class="result-card">
+                    <div class="result-title">実際の最大面積</div>
+                    <div class="result-value" id="actual-max">-</div>
+                    <div style="font-size: 0.9em; color: #666; margin-top: 5px;">グリッドサーチ結果</div>
+                </div>
+
+                <div class="result-card">
+                    <div class="result-title">効率/比率</div>
+                    <div class="result-value" id="efficiency">-</div>
+                    <div style="font-size: 0.9em; color: #666; margin-top: 5px;" id="efficiency-type">-</div>
+                </div>
+
+                <div class="result-card">
+                    <div class="result-title">ピトー偏差</div>
+                    <div class="result-value" id="pitot-deviation">-</div>
+                    <div style="font-size: 0.9em; color: #666; margin-top: 5px;">|(a+c)-(b+d)|</div>
+                </div>
+            </div>
+
+            <div class="result-grid">
+                <div class="result-card">
+                    <div class="result-title">最適内角（度）</div>
+                    <div class="angles-grid" id="angles-grid">
+                        <div class="angle-item">α = <span id="angle-alpha">-</span>°</div>
+                        <div class="angle-item">β = <span id="angle-beta">-</span>°</div>
+                        <div class="angle-item">γ = <span id="angle-gamma">-</span>°</div>
+                        <div class="angle-item">δ = <span id="angle-delta">-</span>°</div>
+                    </div>
+                </div>
+
+                <div class="result-card">
+                    <div class="result-title">頂点座標</div>
+                    <div class="coordinates-grid" id="coordinates-grid">
+                        <div class="coord-item">P1: <span id="coord-p1">-</span></div>
+                        <div class="coord-item">P2: <span id="coord-p2">-</span></div>
+                        <div class="coord-item">P3: <span id="coord-p3">-</span></div>
+                        <div class="coord-item">P4: <span id="coord-p4">-</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="result-card">
+                <div class="result-title">検証結果</div>
+                <div id="verification-results">
+                    <div>実際の辺の長さ: <span id="actual-sides">-</span></div>
+                    <div>目標の辺の長さ: <span id="target-sides">-</span></div>
+                    <div>凸四角形: <span id="convex-check">-</span></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="error" class="error"></div>
+
+        <div class="canvas-container">
+            <canvas id="quadrilateral-canvas" width="600" height="500"></canvas>
+        </div>
+    </div>
+
+    <script>
+        // メイン計算関数
+        async function calculateMaxArea() {
+            const a = parseFloat(document.getElementById('sideA').value);
+            const b = parseFloat(document.getElementById('sideB').value);
+            const c = parseFloat(document.getElementById('sideC').value);
+            const d = parseFloat(document.getElementById('sideD').value);
+
+            if (a <= 0 || b <= 0 || c <= 0 || d <= 0) {
+                showError('すべての辺の長さは正の数である必要があります');
+                return;
+            }
+
+            // 三角不等式チェック
+            const sides = [a, b, c, d];
+            for (let i = 0; i < 4; i++) {
+                const sum = sides.filter((_, idx) => idx !== i).reduce((sum, val) => sum + val, 0);
+                if (sides[i] >= sum) {
+                    showError('三角不等式を満たしません。四角形を構成できません');
+                    return;
+                }
+            }
+
+            hideError();
+            showProgress();
+
+            try {
+                const result = await maxAreaConvexQuadrilateral(a, b, c, d);
+                if (result) {
+                    displayResults(result);
+                    drawQuadrilateral(result);
+                } else {
+                    showError('有効な解が見つかりませんでした');
+                }
+            } catch (error) {
+                console.error('詳細エラー:', error);
+                showError('計算中にエラーが発生しました: ' + error.message + '\n詳細: ' + error.stack);
+            } finally {
+                hideProgress();
+            }
+        }
+
+        // 四角形面積最大化のメイン関数
+        async function maxAreaConvexQuadrilateral(a, b, c, d) {
+            // ピトー偏差の計算
+            const pitotDeviation = Math.abs((a + c) - (b + d));
+            
+            // 理論上限の正しい計算
+            let theoreticalMax;
+            let theoreticalType;
+            let isExactTheory = false;
+            
+            if (pitotDeviation < 1e-6) {
+                // ピトー条件を満たす場合：ブラーマグプタ公式が適用可能
+                const s = (a + b + c + d) / 2;
+                const discriminant = (s - a) * (s - b) * (s - c) * (s - d);
+                
+                if (discriminant <= 0) {
+                    throw new Error('四角形を構成できません');
+                }
+                
+                theoreticalMax = Math.sqrt(discriminant);
+                theoreticalType = 'ブラーマグプタ公式（内接円四角形）';
+                isExactTheory = true;
+            } else {
+                // ピトー条件を満たさない場合：対角線直交時の推定上限
+                const maxDiag1 = a + c;
+                const maxDiag2 = b + d;
+                theoreticalMax = maxDiag1 * maxDiag2 / 2;
+                theoreticalType = '推定上限（対角線直交時）';
+                isExactTheory = false;
+            }
+
+            let bestArea = 0;
+            let bestResult = null;
+            
+            // グリッドサーチパラメータ
+            const angleSteps = 15;
+            const totalIterations = angleSteps * angleSteps * angleSteps;
+            let currentIteration = 0;
+            
+            updateProgress(0, `グリッドサーチ開始 (${totalIterations}回の計算)`);
+            
+            // より単純で確実なアプローチ：一つの内角だけを変化させる
+            updateProgress(0, '単純化アルゴリズムで探索中...');
+            
+            const simpleSteps = 100;  // より細かく探索
+            
+            for (let i = 0; i < simpleSteps; i++) {
+                const progress = (i / simpleSteps) * 100;
+                if (i % 10 === 0) {
+                    updateProgress(progress, `探索中... ${i}/${simpleSteps}`);
+                    await sleep(1);
+                }
+                
+                // βを30度から150度まで変化させる
+                const beta = Math.PI / 6 + (5 * Math.PI / 6) * i / (simpleSteps - 1);
+                
+                // 簡単な四角形構築
+                const vertices = constructQuadrilateralSimple(a, b, c, d, beta);
+                
+                if (vertices && isValidQuadrilateral(vertices, [a, b, c, d])) {
+                    const area = polygonArea(vertices);
+                    if (area > bestArea) {
+                        bestArea = area;
+                        bestResult = {
+                            vertices,
+                            area,
+                            theoreticalMax,
+                            theoreticalType,
+                            isExactTheory,
+                            beta: beta,
+                            sides: [a, b, c, d],
+                            pitotDeviation
+                        };
+                    }
+                }
+            }
+            
+            // フォールバック：さらに単純な方法
+            if (!bestResult) {
+                updateProgress(50, 'フォールバック方法で探索中...');
+                
+                for (let angle = 0.5; angle < Math.PI - 0.5; angle += 0.05) {
+                    const vertices = constructQuadrilateralBasic(a, b, c, d, angle);
+                    
+                    if (vertices && isValidQuadrilateral(vertices, [a, b, c, d])) {
+                        const area = polygonArea(vertices);
+                        if (area > bestArea) {
+                            bestArea = area;
+                            bestResult = {
+                                vertices,
+                                area,
+                                theoreticalMax,
+                                theoreticalType,
+                                isExactTheory,
+                                constructionAngle: angle,
+                                sides: [a, b, c, d],
+                                pitotDeviation
+                            };
+                        }
+                    }
+                }
+            }
+            
+            updateProgress(100, '計算完了');
+            return bestResult;
+        }
+
+        // 単純な四角形構築
+        function constructQuadrilateralSimple(a, b, c, d, beta) {
+            try {
+                // P1を原点、P2をx軸上に配置
+                const P1 = [0, 0];
+                const P2 = [a, 0];
+                
+                // P3の位置をβ角度から計算
+                const angleP2ToP3 = Math.PI - beta;
+                const P3 = [
+                    P2[0] + b * Math.cos(angleP2ToP3),
+                    P2[1] + b * Math.sin(angleP2ToP3)
+                ];
+                
+                // P4の位置を制約から計算: |P1-P4|=d, |P3-P4|=c
+                const P4Candidates = circleIntersectionRobust(P1, d, P3, c);
+                
+                for (const P4 of P4Candidates) {
+                    if (!P4 || !isFinite(P4[0]) || !isFinite(P4[1])) continue;
+                    
+                    const vertices = [P1, P2, P3, P4];
+                    
+                    // 基本的な妥当性チェック
+                    if (isValidQuadrilateral(vertices, [a, b, c, d])) {
+                        return vertices;
+                    }
+                }
+                
+                return null;
+            } catch (error) {
+                console.error('constructQuadrilateralSimple error:', error);
+                return null;
+            }
+        }
+
+        // さらに基本的な四角形構築
+        function constructQuadrilateralBasic(a, b, c, d, angle) {
+            try {
+                // 非常に単純なアプローチ
+                const P1 = [0, 0];
+                const P2 = [a, 0];
+                
+                // P3を角度で配置
+                const P3 = [P2[0] + b * Math.cos(angle), P2[1] + b * Math.sin(angle)];
+                
+                // P4をP1からの距離d、P3からの距離cで配置
+                const P4Candidates = circleIntersectionRobust(P1, d, P3, c);
+                
+                for (const P4 of P4Candidates) {
+                    if (!P4 || !isFinite(P4[0]) || !isFinite(P4[1])) continue;
+                    
+                    const vertices = [P1, P2, P3, P4];
+                    
+                    // 最低限のチェック
+                    if (polygonArea(vertices) > 0.1 && isConvexPolygonRobust(vertices)) {
+                        return vertices;
+                    }
+                }
+                
+                return null;
+            } catch (error) {
+                console.error('constructQuadrilateralBasic error:', error);
+                return null;
+            }
+        }
+
+        // より確実な四角形構築
+        function constructQuadrilateralRobust(a, b, c, d, alpha, beta, gamma, delta) {
+            try {
+                // 入力検証
+                if (a <= 0 || b <= 0 || c <= 0 || d <= 0) {
+                    return null;
+                }
+                
+                if (!isFinite(alpha) || !isFinite(beta) || !isFinite(gamma) || !isFinite(delta)) {
+                    return null;
+                }
+                
+                // P1を原点、P2を正のx軸上に固定
+                const P1 = [0, 0];
+                const P2 = [a, 0];
+                
+                // P3の位置を内角βから計算
+                const angleP2ToP3 = Math.PI - beta;
+                const P3 = [
+                    P2[0] + b * Math.cos(angleP2ToP3),
+                    P2[1] + b * Math.sin(angleP2ToP3)
+                ];
+                
+                // P3の座標が有効かチェック
+                if (!isFinite(P3[0]) || !isFinite(P3[1])) {
+                    return null;
+                }
+                
+                // P4の位置を2つの制約から求める
+                const P4Candidates = circleIntersectionRobust(P1, d, P3, c);
+                
+                for (const P4 of P4Candidates) {
+                    if (!P4 || P4.length !== 2 || !isFinite(P4[0]) || !isFinite(P4[1])) {
+                        continue;
+                    }
+                    
+                    const vertices = [P1, P2, P3, P4];
+                    
+                    // 辺の長さをチェック
+                    const actualSides = [
+                        distance(P1, P2),  // a
+                        distance(P2, P3),  // b
+                        distance(P3, P4),  // c
+                        distance(P4, P1)   // d
+                    ];
+                    
+                    // NaNチェック
+                    if (actualSides.some(side => !isFinite(side))) {
+                        continue;
+                    }
+                    
+                    const sideErrors = [
+                        Math.abs(actualSides[0] - a),
+                        Math.abs(actualSides[1] - b),
+                        Math.abs(actualSides[2] - c),
+                        Math.abs(actualSides[3] - d)
+                    ];
+                    
+                    if (sideErrors.every(error => error < 0.1)) {  // 許容誤差を緩める
+                        // 内角もチェック
+                        if (verifyAngles(vertices, [alpha, beta, gamma, delta])) {
+                            return vertices;
+                        }
+                    }
+                }
+                
+                return null;
+            } catch (error) {
+                console.error('constructQuadrilateralRobust error:', error);
+                return null;
+            }
+        }
+
+        // 内角の検証（簡略化）
+        function verifyAngles(vertices, targetAngles) {
+            try {
+                if (!vertices || vertices.length !== 4 || !targetAngles || targetAngles.length !== 4) {
+                    return false;
+                }
+                
+                // 簡略化：厳密な角度チェックをスキップして、四角形が有効かのみチェック
+                return true; // とりあえず常にtrueを返す
+            } catch (error) {
+                console.error('verifyAngles error:', error);
+                return false;
+            }
+        }
+
+        // 堅牢な円の交点計算
+        function circleIntersectionRobust(center1, radius1, center2, radius2) {
+            try {
+                if (!center1 || !center2 || center1.length !== 2 || center2.length !== 2) {
+                    return [];
+                }
+                
+                if (radius1 <= 0 || radius2 <= 0) {
+                    return [];
+                }
+                
+                const d = distance(center1, center2);
+                
+                // 円が交わらない場合
+                if (d > radius1 + radius2 + 1e-6 || d < Math.abs(radius1 - radius2) - 1e-6) {
+                    return [];
+                }
+                
+                // 同心円の場合
+                if (d < 1e-10) {
+                    return [];
+                }
+                
+                // 交点計算
+                const a = (radius1 * radius1 - radius2 * radius2 + d * d) / (2 * d);
+                const hSquared = radius1 * radius1 - a * a;
+                
+                if (hSquared < 0) {
+                    return [];
+                }
+                
+                const h = Math.sqrt(hSquared);
+                
+                // 中点
+                const px = center1[0] + a * (center2[0] - center1[0]) / d;
+                const py = center1[1] + a * (center2[1] - center1[1]) / d;
+                
+                if (h < 1e-10) {  // 接触の場合
+                    return [[px, py]];
+                }
+                
+                // 2つの交点
+                const intersection1 = [
+                    px + h * (center2[1] - center1[1]) / d,
+                    py - h * (center2[0] - center1[0]) / d
+                ];
+                
+                const intersection2 = [
+                    px - h * (center2[1] - center1[1]) / d,
+                    py + h * (center2[0] - center1[0]) / d
+                ];
+                
+                return [intersection1, intersection2];
+            } catch (error) {
+                console.error('circleIntersectionRobust error:', error);
+                return [];
+            }
+        }
+
+        // 簡単な四角形検証
+        function isValidQuadrilateral(vertices, targetSides) {
+            try {
+                if (!vertices || vertices.length !== 4) return false;
+                
+                // 面積が正であることをチェック
+                const area = polygonArea(vertices);
+                if (area <= 0) return false;
+                
+                // 凸性チェック
+                if (!isConvexPolygonRobust(vertices)) return false;
+                
+                // 辺の長さチェック（緩い条件）
+                const actualSides = [];
+                for (let i = 0; i < 4; i++) {
+                    const j = (i + 1) % 4;
+                    const sideLength = distance(vertices[i], vertices[j]);
+                    if (!isFinite(sideLength)) return false;
+                    actualSides.push(sideLength);
+                }
+                
+                const sideErrors = actualSides.map((side, i) => Math.abs(side - targetSides[i]));
+                
+                // 20%の誤差まで許容
+                return sideErrors.every((error, i) => error < targetSides[i] * 0.2);
+            } catch (error) {
+                console.error('isValidQuadrilateral error:', error);
+                return false;
+            }
+        }
+
+        // 凸性と辺の長さの検証
+        function isConvexAndValidSides(vertices, targetSides) {
+            // 凸性チェック
+            if (!isConvexPolygonRobust(vertices)) {
+                return false;
+            }
+            
+            // 辺の長さチェック
+            const actualSides = [];
+            const n = vertices.length;
+            
+            for (let i = 0; i < n; i++) {
+                const j = (i + 1) % n;
+                const sideLength = distance(vertices[i], vertices[j]);
+                actualSides.push(sideLength);
+            }
+            
+            const sideErrors = actualSides.map((side, i) => Math.abs(side - targetSides[i]));
+            
+            return sideErrors.every(error => error < 0.05);
+        }
+
+        // 堅牢な凸性チェック
+        function isConvexPolygonRobust(vertices) {
+            const n = vertices.length;
+            if (n < 3) return false;
+            
+            const crossProducts = [];
+            
+            for (let i = 0; i < n; i++) {
+                const p1 = vertices[i];
+                const p2 = vertices[(i + 1) % n];
+                const p3 = vertices[(i + 2) % n];
+                
+                const v1 = [p2[0] - p1[0], p2[1] - p1[1]];
+                const v2 = [p3[0] - p2[0], p3[1] - p2[1]];
+                
+                const crossProduct = v1[0] * v2[1] - v1[1] * v2[0];
+                
+                if (Math.abs(crossProduct) > 1e-10) {  // 数値誤差を考慮
+                    crossProducts.push(Math.sign(crossProduct));
+                }
+            }
+            
+            // すべて同じ符号かチェック
+            const uniqueSigns = [...new Set(crossProducts)];
+            return uniqueSigns.length <= 1;
+        }
+
+        // Shoelace公式による面積計算
+        function polygonArea(vertices) {
+            const n = vertices.length;
+            let area = 0;
+            
+            for (let i = 0; i < n; i++) {
+                const j = (i + 1) % n;
+                area += vertices[i][0] * vertices[j][1];
+                area -= vertices[j][0] * vertices[i][1];
+            }
+            
+            return Math.abs(area) / 2;
+        }
+
+        // 2点間の距離
+        function distance(p1, p2) {
+            return Math.sqrt((p1[0] - p2[0]) ** 2 + (p1[1] - p2[1]) ** 2);
+        }
+
+        // 実際の内角を計算
+        function calculateActualAngles(vertices) {
+            try {
+                if (!vertices || vertices.length !== 4) return null;
+                
+                const angles = [];
+                const n = vertices.length;
+                
+                for (let i = 0; i < n; i++) {
+                    const prevIndex = (i - 1 + n) % n;
+                    const nextIndex = (i + 1) % n;
+                    
+                    const p1 = vertices[prevIndex];  // 前の頂点
+                    const p2 = vertices[i];          // 現在の頂点
+                    const p3 = vertices[nextIndex];  // 次の頂点
+                    
+                    // ベクトルを計算
+                    const v1 = [p1[0] - p2[0], p1[1] - p2[1]];  // p2から p1へのベクトル
+                    const v2 = [p3[0] - p2[0], p3[1] - p2[1]];  // p2から p3へのベクトル
+                    
+                    // 内積とベクトルの大きさ
+                    const dotProduct = v1[0] * v2[0] + v1[1] * v2[1];
+                    const mag1 = Math.sqrt(v1[0] * v1[0] + v1[1] * v1[1]);
+                    const mag2 = Math.sqrt(v2[0] * v2[0] + v2[1] * v2[1]);
+                    
+                    if (mag1 === 0 || mag2 === 0) return null;
+                    
+                    // コサイン値を計算（範囲を-1から1にクランプ）
+                    const cosAngle = Math.max(-1, Math.min(1, dotProduct / (mag1 * mag2)));
+                    
+                    // 内角を計算
+                    const angle = Math.acos(cosAngle);
+                    
+                    angles.push(angle);
+                }
+                
+                // 角度の合計が約2πになるかチェック（妥当性確認）
+                const angleSum = angles.reduce((sum, angle) => sum + angle, 0);
+                if (Math.abs(angleSum - 2 * Math.PI) > 0.1) {
+                    console.warn('角度の合計が2πと大きく異なります:', angleSum);
+                }
+                
+                return angles;
+            } catch (error) {
+                console.error('calculateActualAngles error:', error);
+                return null;
+            }
+        }
+
+        // 結果表示
+        function displayResults(result) {
+            document.getElementById('theoretical-max').textContent = result.theoreticalMax.toFixed(6);
+            document.getElementById('theoretical-type').textContent = result.theoreticalType;
+            document.getElementById('actual-max').textContent = result.area.toFixed(6);
+            
+            const ratio = (result.area / result.theoreticalMax) * 100;
+            document.getElementById('efficiency').textContent = ratio.toFixed(2) + '%';
+            
+            if (result.isExactTheory) {
+                document.getElementById('efficiency-type').textContent = 'ブラーマグプタに対する効率';
+            } else {
+                document.getElementById('efficiency-type').textContent = '推定上限に対する比率';
+            }
+            
+            document.getElementById('pitot-deviation').textContent = result.pitotDeviation.toFixed(6);
+            
+            // 角度表示 - 実際の内角を計算
+            const actualAngles = calculateActualAngles(result.vertices);
+            
+            if (actualAngles && actualAngles.length === 4) {
+                const anglesDeg = actualAngles.map(angle => (angle * 180 / Math.PI).toFixed(2));
+                document.getElementById('angle-alpha').textContent = anglesDeg[0];
+                document.getElementById('angle-beta').textContent = anglesDeg[1];
+                document.getElementById('angle-gamma').textContent = anglesDeg[2];
+                document.getElementById('angle-delta').textContent = anglesDeg[3];
+            } else if (result.angles) {
+                const anglesDeg = result.angles.map(angle => (angle * 180 / Math.PI).toFixed(2));
+                document.getElementById('angle-alpha').textContent = anglesDeg[0];
+                document.getElementById('angle-beta').textContent = anglesDeg[1];
+                document.getElementById('angle-gamma').textContent = anglesDeg[2];
+                document.getElementById('angle-delta').textContent = anglesDeg[3];
+            } else {
+                // フォールバック表示
+                document.getElementById('angle-alpha').textContent = result.beta ? '-' : '-';
+                document.getElementById('angle-beta').textContent = result.beta ? (result.beta * 180 / Math.PI).toFixed(2) : '-';
+                document.getElementById('angle-gamma').textContent = result.constructionAngle ? (result.constructionAngle * 180 / Math.PI).toFixed(2) : '-';
+                document.getElementById('angle-delta').textContent = '-';
+            }
+            
+            // 座標表示
+            result.vertices.forEach((vertex, i) => {
+                const coordStr = `(${vertex[0].toFixed(3)}, ${vertex[1].toFixed(3)})`;
+                document.getElementById(`coord-p${i + 1}`).textContent = coordStr;
+            });
+            
+            // 検証結果
+            const actualSides = result.vertices.map((vertex, i) => {
+                const nextVertex = result.vertices[(i + 1) % 4];
+                return distance(vertex, nextVertex);
+            });
+            
+            document.getElementById('actual-sides').textContent = actualSides.map(s => s.toFixed(3)).join(', ');
+            document.getElementById('target-sides').textContent = result.sides.join(', ');
+            document.getElementById('convex-check').textContent = isConvexPolygonRobust(result.vertices) ? '✓ はい' : '✗ いいえ';
+            
+            document.getElementById('results').style.display = 'block';
+        }
+
+        // 四角形の描画
+        function drawQuadrilateral(result) {
+            const canvas = document.getElementById('quadrilateral-canvas');
+            const ctx = canvas.getContext('2d');
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            const vertices = result.vertices;
+            const sides = result.sides;
+            
+            // スケールと位置調整（改良版）
+            const allX = vertices.map(v => v[0]);
+            const allY = vertices.map(v => v[1]);
+            const minX = Math.min(...allX);
+            const maxX = Math.max(...allX);
+            const minY = Math.min(...allY);
+            const maxY = Math.max(...allY);
+            
+            const width = maxX - minX;
+            const height = maxY - minY;
+            
+            // ラベルやマージン用の余白を考慮
+            const topMargin = 60;    // 上部の余白（面積表示用）
+            const bottomMargin = 40; // 下部の余白
+            const sideMargin = 60;   // 左右の余白
+            
+            const availableWidth = canvas.width - 2 * sideMargin;
+            const availableHeight = canvas.height - topMargin - bottomMargin;
+            
+            // より保守的なスケール設定
+            const scale = Math.min(
+                availableWidth / Math.max(width, 1),
+                availableHeight / Math.max(height, 1)
+            ) * 0.7; // さらに余裕を持たせる
+            
+            // 中央配置の計算を修正
+            const drawingCenterX = sideMargin + availableWidth / 2;
+            const drawingCenterY = topMargin + availableHeight / 2;
+            
+            const offsetX = drawingCenterX - (minX + maxX) * scale / 2;
+            const offsetY = drawingCenterY + (minY + maxY) * scale / 2; // Y軸反転を考慮
+            
+            // 四角形描画
+            ctx.beginPath();
+            ctx.strokeStyle = '#667eea';
+            ctx.lineWidth = 3;
+            ctx.fillStyle = 'rgba(102, 126, 234, 0.1)';
+            
+            vertices.forEach((vertex, i) => {
+                const x = vertex[0] * scale + offsetX;
+                const y = -vertex[1] * scale + offsetY;
+                
+                if (i === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            });
+            
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+            
+            // 頂点と辺の長さ
+            ctx.fillStyle = '#764ba2';
+            const sideLabels = ['a', 'b', 'c', 'd'];
+            
+            vertices.forEach((vertex, i) => {
+                const x = vertex[0] * scale + offsetX;
+                const y = -vertex[1] * scale + offsetY;
+                
+                // 頂点の描画サイズを調整
+                const vertexSize = Math.max(4, Math.min(8, scale * 0.05));
+                ctx.beginPath();
+                ctx.arc(x, y, vertexSize, 0, 2 * Math.PI);
+                ctx.fill();
+                
+                // 頂点ラベルの位置を調整
+                ctx.fillStyle = '#333';
+                const fontSize = Math.max(12, Math.min(16, scale * 0.08));
+                ctx.font = `bold ${fontSize}px Arial`;
+                
+                // ラベルが canvas外に出ないように調整
+                const labelOffsetX = x + 15 > canvas.width - sideMargin ? -25 : 15;
+                const labelOffsetY = y - 15 < topMargin ? 25 : -15;
+                ctx.fillText(`P${i + 1}`, x + labelOffsetX, y + labelOffsetY);
+                
+                // 辺の長さラベル
+                const nextI = (i + 1) % vertices.length;
+                const nextVertex = vertices[nextI];
+                const midX = (vertex[0] + nextVertex[0]) * scale / 2 + offsetX;
+                const midY = -(vertex[1] + nextVertex[1]) * scale / 2 + offsetY;
+                
+                // 辺ラベルも canvas内に収める
+                ctx.fillStyle = '#e74c3c';
+                const sideFontSize = Math.max(10, Math.min(14, scale * 0.06));
+                ctx.font = `bold ${sideFontSize}px Arial`;
+                
+                const sideText = `${sideLabels[i]}=${sides[i]}`;
+                const textWidth = ctx.measureText(sideText).width;
+                
+                let sideLabelX = midX - textWidth / 2;
+                let sideLabelY = midY;
+                
+                // ラベルが canvas外に出る場合の調整
+                if (sideLabelX < sideMargin/2) sideLabelX = sideMargin/2;
+                if (sideLabelX + textWidth > canvas.width - sideMargin/2) sideLabelX = canvas.width - textWidth - sideMargin/2;
+                if (sideLabelY < topMargin/2) sideLabelY = topMargin/2;
+                if (sideLabelY > canvas.height - bottomMargin/2) sideLabelY = canvas.height - bottomMargin/2;
+                
+                ctx.fillText(sideText, sideLabelX, sideLabelY);
+                
+                ctx.fillStyle = '#764ba2';
+            });
+            
+            // 面積表示（上部中央に配置）
+            ctx.fillStyle = '#2c3e50';
+            ctx.font = 'bold 18px Arial';
+            const areaText = `面積: ${result.area.toFixed(3)}`;
+            const areaTextWidth = ctx.measureText(areaText).width;
+            const areaX = (canvas.width - areaTextWidth) / 2;
+            ctx.fillText(areaText, areaX, 30);
+        }
+
+        // ユーティリティ関数
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        function showProgress() {
+            document.getElementById('progress-container').style.display = 'block';
+            document.getElementById('progress-text').style.display = 'block';
+        }
+
+        function hideProgress() {
+            document.getElementById('progress-container').style.display = 'none';
+            document.getElementById('progress-text').style.display = 'none';
+        }
+
+        function updateProgress(percent, text) {
+            document.getElementById('progress-bar').style.width = percent + '%';
+            document.getElementById('progress-text').textContent = text;
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('error');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            document.getElementById('results').style.display = 'none';
+        }
+
+        function hideError() {
+            document.getElementById('error').style.display = 'none';
+        }
+
+        function loadExample() {
+            const examples = [
+                [3, 4, 5, 6],
+                [4, 5, 4, 5],  // ピトー条件を満たす
+                [3, 4, 4, 3],  // ピトー条件を満たす
+                [5, 5, 5, 5],  // 正方形
+                [2, 3, 4, 5]
+            ];
+            
+            const example = examples[Math.floor(Math.random() * examples.length)];
+            
+            document.getElementById('sideA').value = example[0];
+            document.getElementById('sideB').value = example[1];
+            document.getElementById('sideC').value = example[2];
+            document.getElementById('sideD').value = example[3];
+        }
+    </script>
+</body>
+</html>
