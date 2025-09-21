@@ -4,7 +4,7 @@
 
 ## 🔗 デモサイト
 
-[https://shimizudan.github.io/quadrilateral-area-maximizer/](まだ公開していません)
+https://shimizudan.github.io/20250921en/
 
 ## ✨ 特徴
 
